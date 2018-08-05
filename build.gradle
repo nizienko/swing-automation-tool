@@ -49,9 +49,9 @@ compileTestKotlin {
     kotlinOptions.jvmTarget = "1.8"
 }
 
-test {
+/*test {
     useJUnitPlatform()
-}
+}*/
 
 shadowJar {
     baseName = 'swing-automation-tool'

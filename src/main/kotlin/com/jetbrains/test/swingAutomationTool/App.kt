@@ -1,6 +1,8 @@
 package com.jetbrains.test.swingAutomationTool
 
 import com.google.gson.Gson
+import com.jetbrains.test.swingAutomationTool.data.*
+import com.jetbrains.test.swingAutomationTool.data.ResponseStatus.ERROR
 import com.jetbrains.test.swingAutomationTool.services.*
 import io.ktor.application.ApplicationCall
 import io.ktor.application.call
@@ -17,10 +19,7 @@ import io.ktor.routing.post
 import io.ktor.routing.routing
 import io.ktor.server.engine.embeddedServer
 import io.ktor.server.netty.Netty
-import org.fest.swing.core.GenericTypeMatcher
-import org.fest.swing.finder.WindowFinder
 import org.slf4j.event.Level
-import java.awt.Component
 import java.text.DateFormat
 
 fun main(args: Array<String>) {
@@ -37,28 +36,63 @@ fun main(args: Array<String>) {
             }
         }
         routing {
-            get("/start") {
-                start()
-                call.respond(Response("success"))
+            post("/start") {
+                call.commonRequest { start(call.receiveJson()) }
             }
             get("/stop") {
-                stop()
-                call.respond(Response("success"))
+                call.commonRequest { stop() }
             }
             post("/elements") {
-                call.respond(findElements(call.receiveJson()))
+                call.dataRequest {
+                    FindElementsResponse(
+                            elementList = findElements(filter = call.receiveJson()))
+                }
+            }
+            post("/{id}/elements") {
+                call.dataRequest {
+                    val id = call.parameters["id"] ?: throw IllegalArgumentException("empty id")
+                    FindElementsResponse(
+                            elementList = findElements(
+                                    containerId = id,
+                                    filter = call.receiveJson())
+                    )
+                }
             }
             get("/{id}/click") {
-                val id = call.parameters["id"] ?: throw IllegalArgumentException("empty id")
-                click(id)
-                call.respond(Response("success"))
+                call.commonRequest {
+                    val id = call.parameters["id"] ?: throw IllegalArgumentException("empty id")
+                    click(id)
+                }
+            }
+            get("/hierarchy") {
+                call.dataRequest {
+                    ListResponse(list = hierarchy())
+                }
             }
         }
     }.start(wait = true)
 }
 
-data class Response(val status: String)
+suspend inline fun ApplicationCall.commonRequest(code: () -> Unit) {
+    val response = try {
+        code()
+        CommonResponse()
+    } catch (e: Throwable) {
+        e.printStackTrace()
+        CommonResponse(ERROR, e.message)
+    }
+    this.respond(response)
+}
 
+suspend inline fun ApplicationCall.dataRequest(code: () -> Response) {
+    val response = try {
+        code()
+    } catch (e: Throwable) {
+        e.printStackTrace()
+        CommonResponse(ERROR, e.message)
+    }
+    this.respond(response)
+}
 
 val gson = Gson()
 
