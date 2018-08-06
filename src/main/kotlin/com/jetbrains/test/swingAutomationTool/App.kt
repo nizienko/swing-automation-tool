@@ -69,6 +69,14 @@ fun main(args: Array<String>) {
                     ListResponse(list = hierarchy())
                 }
             }
+            post("/{id}/setText") {
+                call.commonRequest {
+                    val id = call.parameters["id"] ?: throw IllegalArgumentException("empty id")
+                    val text = call.receiveText()
+                    println(text)
+                    setText(id, text)
+                }
+            }
         }
     }.start(wait = true)
 }
@@ -101,4 +109,6 @@ suspend inline fun <reified T> ApplicationCall.receiveJson(): T {
     println(text)
     return gson.fromJson(text, T::class.java)
 }
+
+
 

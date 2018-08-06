@@ -1,11 +1,12 @@
 package com.jetbrains.test.swingAutomationTool.services
 
 import com.jetbrains.test.swingAutomationTool.data.ApplicationSettings
-import com.jetbrains.test.swingAutomationTool.data.BaseElement
+import com.jetbrains.test.swingAutomationTool.data.ElementDescription
 import com.jetbrains.test.swingAutomationTool.data.SearchFilter
 import org.fest.swing.core.BasicRobot
 import org.fest.swing.core.GenericTypeMatcher
 import org.fest.swing.core.Robot
+import org.fest.swing.fixture.JTextComponentFixture
 import org.fest.swing.launcher.ApplicationLauncher
 import java.awt.Component
 import java.awt.Container
@@ -13,6 +14,7 @@ import java.io.File
 import java.net.URL
 import java.net.URLClassLoader
 import java.util.*
+import javax.swing.text.JTextComponent
 import kotlin.concurrent.thread
 
 private var applicationThread: Thread? = null
@@ -45,7 +47,7 @@ fun stop() {
     applicationThread = null
 }
 
-fun findElements(containerId: String? = null, filter: SearchFilter): List<BaseElement> {
+fun findElements(containerId: String? = null, filter: SearchFilter): List<ElementDescription> {
     if (containerId == null) {
         return robot.finder()
                 .findAll { it.filter(filter) }
@@ -55,7 +57,7 @@ fun findElements(containerId: String? = null, filter: SearchFilter): List<BaseEl
                     return@map it.toBaseElement(uid)
                 }
     } else {
-        val component = componentStorage[containerId]?:throw IllegalStateException("Unknown element id $containerId")
+        val component = componentStorage[containerId] ?: throw IllegalStateException("Unknown element id $containerId")
         if (component is Container) {
             return robot.finder()
                     .findAll { it.filter(filter) }
@@ -69,7 +71,7 @@ fun findElements(containerId: String? = null, filter: SearchFilter): List<BaseEl
 }
 
 fun click(id: String) {
-    val component = componentStorage[id]?:throw IllegalStateException("Unknown element id $id")
+    val component = componentStorage[id] ?: throw IllegalStateException("Unknown element id $id")
     robot.click(component)
 }
 
@@ -82,7 +84,7 @@ fun hierarchy(): List<Any> {
 }
 
 data class DescribedComponent(
-        val thisElement: BaseElement,
+        val thisElement: ElementDescription,
         val children: List<DescribedComponent>
 )
 
@@ -105,7 +107,7 @@ private fun Component.filter(filter: SearchFilter): Boolean {
     return result
 }
 
-private fun Component.toBaseElement(id: String): BaseElement = BaseElement(
+private fun Component.toBaseElement(id: String): ElementDescription = ElementDescription(
         id,
         this::class.java.canonicalName,
         this.name
@@ -118,3 +120,12 @@ inline fun <reified T : Component> matcher(crossinline matchFun: (component: T) 
                 return matchFun(component)
             }
         }
+
+fun setText(id: String, text: String) {
+    val component = componentStorage[id] ?: throw IllegalStateException("Unknown element id $id")
+    if (component is JTextComponent) {
+        JTextComponentFixture(robot, component).setText(text)
+    } else {
+        throw IllegalStateException("Component is not a TextField ")
+    }
+}

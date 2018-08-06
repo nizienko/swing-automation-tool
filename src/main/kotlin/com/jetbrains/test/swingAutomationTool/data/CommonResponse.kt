@@ -16,7 +16,7 @@ data class CommonResponse(
 data class FindElementsResponse(
         override val status: ResponseStatus = SUCCESS,
         override val message: String? = null,
-        val elementList: List<BaseElement>) : Response
+        val elementList: List<ElementDescription>) : Response
 
 data class ListResponse(
         override val status: ResponseStatus = SUCCESS,
