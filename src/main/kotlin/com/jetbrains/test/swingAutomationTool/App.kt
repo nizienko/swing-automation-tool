@@ -1,7 +1,10 @@
 package com.jetbrains.test.swingAutomationTool
 
 import com.google.gson.Gson
-import com.jetbrains.test.swingAutomationTool.data.*
+import com.jetbrains.test.swingAutomationTool.data.CommonResponse
+import com.jetbrains.test.swingAutomationTool.data.FindElementsResponse
+import com.jetbrains.test.swingAutomationTool.data.ListResponse
+import com.jetbrains.test.swingAutomationTool.data.Response
 import com.jetbrains.test.swingAutomationTool.data.ResponseStatus.ERROR
 import com.jetbrains.test.swingAutomationTool.services.*
 import io.ktor.application.ApplicationCall
@@ -73,7 +76,6 @@ fun main(args: Array<String>) {
                 call.commonRequest {
                     val id = call.parameters["id"] ?: throw IllegalArgumentException("empty id")
                     val text = call.receiveText()
-                    println(text)
                     setText(id, text)
                 }
             }

@@ -4,10 +4,10 @@ import clientTests.lib.RemoteRobot
 import com.jetbrains.test.swingAutomationTool.data.ElementDescription
 import com.jetbrains.test.swingAutomationTool.data.SearchFilter
 
-open class BaseElement(protected val robot: RemoteRobot, val description: ElementDescription) {
+open class BaseElement(val robot: RemoteRobot, val description: ElementDescription) {
     fun click() = robot.click(this)
 
-    fun findElements(request: SearchFilter): List<BaseElement> {
+    inline fun <reified T : BaseElement> findElements(request: SearchFilter): List<T> {
         return robot.findElements(request, this)
     }
 }

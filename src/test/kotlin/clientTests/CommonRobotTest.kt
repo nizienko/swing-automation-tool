@@ -2,7 +2,7 @@ package clientTests
 
 import clientTests.lib.RemoteRobot
 import clientTests.lib.elements.BaseElement
-import clientTests.lib.elements.JTextFieldElement
+import clientTests.lib.pageObject.SwingSet2App
 import com.google.gson.Gson
 import com.jetbrains.test.swingAutomationTool.data.SearchFilter
 import org.junit.jupiter.api.AfterEach
@@ -18,6 +18,8 @@ class CommonRobotTest {
     private val url = "http://127.0.0.1:8080"
 
     private val remoteRobot = RemoteRobot(url, jarPath, className)
+
+    private val app = SwingSet2App(remoteRobot)
 
     @BeforeEach
     fun runApp() {
@@ -37,7 +39,7 @@ class CommonRobotTest {
                         isShowing = true,
                         className = "javax.swing.JPanel"
                 )).first()
-                .findElements(
+                .findElements<BaseElement>(
                         SearchFilter(
                                 isShowing = true,
                                 className = "javax.swing.JToggleButton")
@@ -46,22 +48,10 @@ class CommonRobotTest {
 
     @Test
     fun editTextField() {
-        remoteRobot.findElements<BaseElement>(
-                SearchFilter(
-                        isShowing = true,
-                        className = "javax.swing.JPanel"
-                )).first()
-                .findElements(
-                        SearchFilter(
-                                isShowing = true,
-                                className = "javax.swing.JToggleButton")
-                )[13].click()
-        remoteRobot.findElements<JTextFieldElement>(
-                SearchFilter(
-                        isShowing = true,
-                        className = "javax.swing.JTextField"
-                )
-        )[1].setTest("Test text")
+        with(app) {
+            topPanel.jTableButton.click()
+            jTablePanel.printingHeaderTextField.setTest("Hello from test")
+        }
         println()
     }
 }
