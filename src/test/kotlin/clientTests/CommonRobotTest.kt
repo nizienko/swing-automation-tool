@@ -13,11 +13,11 @@ class CommonRobotTest {
 
     val gson = Gson()
 
-    private val jarPath = "/home/eugenenizienko/IdeaProjects/SwingSet2Tests/src/test/resources/targetApp/SwingSet2.jar"
     private val className = "SwingSet2"
     private val url = "http://127.0.0.1:8080"
+    private val classPath = "/home/eugenenizienko/IdeaProjects/SwingSet2Tests/src/test/resources/targetApp/"
 
-    private val remoteRobot = RemoteRobot(url, jarPath, className)
+    private val remoteRobot = RemoteRobot(url, className, classPath)
 
     private val app = SwingSet2App(remoteRobot)
 

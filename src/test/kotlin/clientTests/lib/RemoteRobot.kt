@@ -8,14 +8,14 @@ import org.apache.http.entity.ContentType
 
 class RemoteRobot(
         val url: String,
-        private val jarPath: String,
-        private val className: String
+        private val className: String,
+        private val classPath: String
 ) {
     val gson = Gson()
 
     fun start() {
         Request.Post("$url/start")
-                .bodyString(gson.toJson(ApplicationSettings(jarPath, className)), ContentType.APPLICATION_JSON)
+                .bodyString(gson.toJson(ApplicationSettings(className, classPath)), ContentType.APPLICATION_JSON)
                 .execute().returnContent().asResponse<CommonResponse>()
     }
 

@@ -11,7 +11,6 @@ import java.awt.Component
 import java.awt.Container
 import java.io.File
 import java.lang.reflect.Modifier
-import java.net.URL
 import java.net.URLClassLoader
 import java.util.*
 import javax.swing.text.JTextComponent
@@ -29,10 +28,17 @@ val robot
 fun start(settings: ApplicationSettings) {
     if (applicationThread == null) {
         applicationThread = thread {
-            val classLoader = URLClassLoader(arrayOf<URL>(File(settings.path).toURI().toURL()))
+            val files = File(settings.classPath).listFiles()
+                    .filter { it.isFile && it.name.endsWith("jar") }
+                    .map { it.toURI().toURL() }
+                    .toTypedArray()
+            val classLoader = URLClassLoader(files)
             try {
+                println("Launching ${settings.className}\n classPath:\n${settings.classPath}")
                 val clazz = classLoader.loadClass(settings.className)
-                ApplicationLauncher.application(clazz).start()
+                ApplicationLauncher
+                        .application(clazz)
+                        .start()
             } catch (e: ClassNotFoundException) {
                 throw IllegalArgumentException("Bad className ${settings.className}", e)
             }
