@@ -79,6 +79,9 @@ fun main(args: Array<String>) {
                     setText(id, text)
                 }
             }
+            get("/debug") {
+                call.commonRequest { debug() }
+            }
         }
     }.start(wait = true)
 }

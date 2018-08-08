@@ -24,6 +24,8 @@ private val componentStorage = mutableMapOf<String, Component>()
 val robot
     get() = _robot ?: throw IllegalStateException("Start app first")
 
+val parser = ComponentFilterParser()
+
 
 fun start(settings: ApplicationSettings) {
     if (applicationThread == null) {
@@ -38,6 +40,7 @@ fun start(settings: ApplicationSettings) {
                 val clazz = classLoader.loadClass(settings.className)
                 ApplicationLauncher
                         .application(clazz)
+                        .withArgs(settings.args)
                         .start()
             } catch (e: ClassNotFoundException) {
                 throw IllegalArgumentException("Bad className ${settings.className}", e)
@@ -55,9 +58,10 @@ fun stop() {
 }
 
 fun findElements(containerId: String? = null, filter: SearchFilter): List<ElementDescription> {
+    val scriptFilter = filter.script?.let { parser.getFilter(it) } ?: { true }
     if (containerId == null) {
         return robot.finder()
-                .findAll { it.filter(filter) }
+                .findAll { it.filter(filter) && scriptFilter(it) }
                 .map {
                     val uid = UUID.randomUUID().toString()
                     componentStorage[uid] = it
@@ -67,7 +71,7 @@ fun findElements(containerId: String? = null, filter: SearchFilter): List<Elemen
         val component = componentStorage[containerId] ?: throw IllegalStateException("Unknown element id $containerId")
         if (component is Container) {
             return robot.finder()
-                    .findAll { it.filter(filter) }
+                    .findAll { it.filter(filter) && scriptFilter(it) }
                     .map {
                         val uid = UUID.randomUUID().toString()
                         componentStorage[uid] = it
@@ -80,6 +84,11 @@ fun findElements(containerId: String? = null, filter: SearchFilter): List<Elemen
 fun click(id: String) {
     val component = componentStorage[id] ?: throw IllegalStateException("Unknown element id $id")
     robot.click(component)
+}
+
+fun debug() {
+    // set brakpoint herer
+    println()
 }
 
 fun hierarchy(): List<Any> {

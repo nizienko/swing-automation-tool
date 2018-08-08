@@ -1,5 +1,5 @@
 plugins {
-    id 'org.jetbrains.kotlin.jvm' version '1.2.50'
+    id 'org.jetbrains.kotlin.jvm' version '1.2.60'
     id 'com.github.johnrengelman.shadow' version '2.0.4'
     id 'java'
     id 'application'
@@ -16,9 +16,11 @@ version '1.0-SNAPSHOT'
 repositories {
     mavenCentral()
     jcenter()
+    maven { url "https://dl.bintray.com/kotlin/kotlinx" }
     maven { url "https://dl.bintray.com/kotlin/ktor" }
 }
 
+ext.kotlin_version = "1.2.60"
 ext.ktor_version = "0.9.3"
 ext.logback_version = "1.2.3"
 ext.fest_version = "1.2.1"
@@ -31,6 +33,8 @@ dependencies {
     compile "io.ktor:ktor-gson:$ktor_version"
     compile "ch.qos.logback:logback-classic:$logback_version"
     compile "org.easytesting:fest-swing:$fest_version"
+    compile group: 'org.jetbrains.kotlin', name: 'kotlin-compiler-embeddable', version: "$kotlin_version"
+    compile group: 'org.jetbrains.kotlin', name: 'kotlin-script-util', version: "$kotlin_version"
     testCompile "org.junit.jupiter:junit-jupiter-api:5.2.0"
     testRuntime "org.junit.jupiter:junit-jupiter-engine:5.2.0"
     testRuntime "org.junit.platform:junit-platform-launcher:1.2.0"
@@ -41,6 +45,8 @@ kotlin {
         coroutines "enable"
     }
 }
+
+sourceCompatibility = 1.8
 
 compileKotlin {
     kotlinOptions.jvmTarget = "1.8"

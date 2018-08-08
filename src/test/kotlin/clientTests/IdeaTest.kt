@@ -14,5 +14,6 @@ class IdeaTest {
     @Test
     fun test() {
         remoteRobot.start()
+        println()
     }
 }
