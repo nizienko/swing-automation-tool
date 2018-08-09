@@ -25,14 +25,18 @@ class RemoteRobot(
                 .execute().returnContent().asResponse<CommonResponse>()
     }
 
-    inline fun <reified T : BaseElement> findElements(request: SearchFilter, container: BaseElement? = null): List<T> {
+    inline fun <reified T : BaseElement> findElements(request: SearchScriptBuilder.() -> Unit): List<T> {
+        return findElements(null, request)
+    }
+
+    inline fun <reified T : BaseElement> findElements(container: BaseElement?, request: SearchScriptBuilder.() -> Unit): List<T> {
         val urlString = if (container != null) {
             "$url/${container.description.id}/elements"
         } else {
             "$url/elements"
         }
         return Request.Post(urlString)
-                .bodyString(gson.toJson(request), ContentType.APPLICATION_JSON)
+                .bodyString(gson.toJson(SearchFilter(script = SearchScriptBuilder().apply(request).build())), ContentType.APPLICATION_JSON)
                 .execute().returnContent().asResponse<FindElementsResponse>().elementList
                 .map {
                     T::class.java.getConstructor(
@@ -49,6 +53,12 @@ class RemoteRobot(
     fun setText(element: BaseElement, text: String) {
         Request.Post("$url/${element.description.id}/setText")
                 .bodyString(text, ContentType.TEXT_PLAIN)
+                .execute().returnContent().asResponse<CommonResponse>()
+    }
+
+    fun executeScript(element: BaseElement, script: String) {
+        Request.Post("$url/${element.description.id}/executeScript")
+                .bodyString(script, ContentType.TEXT_PLAIN)
                 .execute().returnContent().asResponse<CommonResponse>()
     }
 }

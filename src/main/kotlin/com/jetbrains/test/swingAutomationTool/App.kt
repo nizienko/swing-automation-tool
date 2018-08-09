@@ -79,6 +79,13 @@ fun main(args: Array<String>) {
                     setText(id, text)
                 }
             }
+            post("/{id}/executeScript") {
+                call.commonRequest {
+                    val id = call.parameters["id"] ?: throw IllegalArgumentException("empty id")
+                    val script = call.receiveText()
+                    doAction(id, script)
+                }
+            }
             get("/debug") {
                 call.commonRequest { debug() }
             }

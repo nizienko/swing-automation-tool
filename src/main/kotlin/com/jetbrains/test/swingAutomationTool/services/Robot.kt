@@ -3,6 +3,7 @@ package com.jetbrains.test.swingAutomationTool.services
 import com.jetbrains.test.swingAutomationTool.data.ApplicationSettings
 import com.jetbrains.test.swingAutomationTool.data.ElementDescription
 import com.jetbrains.test.swingAutomationTool.data.SearchFilter
+import com.jetbrains.test.swingAutomationTool.utils.LimitedMap
 import org.fest.swing.core.BasicRobot
 import org.fest.swing.core.Robot
 import org.fest.swing.fixture.JTextComponentFixture
@@ -19,12 +20,13 @@ import kotlin.concurrent.thread
 
 private var applicationThread: Thread? = null
 private var _robot: Robot? = null
-private val componentStorage = mutableMapOf<String, Component>()
+private val componentStorage = LimitedMap<String, Component>()
 
 val robot
     get() = _robot ?: throw IllegalStateException("Start app first")
 
-val parser = ComponentFilterParser()
+val searchParser = ComponentFilterParser()
+val actionParser = RobotActionParser()
 
 
 fun start(settings: ApplicationSettings) {
@@ -58,7 +60,7 @@ fun stop() {
 }
 
 fun findElements(containerId: String? = null, filter: SearchFilter): List<ElementDescription> {
-    val scriptFilter = filter.script?.let { parser.getFilter(it) } ?: { true }
+    val scriptFilter = filter.script?.let { searchParser.getFilter(it) } ?: { true }
     if (containerId == null) {
         return robot.finder()
                 .findAll { it.filter(filter) && scriptFilter(it) }
@@ -87,7 +89,7 @@ fun click(id: String) {
 }
 
 fun debug() {
-    // set brakpoint herer
+    // set brakpoint here
     println()
 }
 
@@ -156,6 +158,11 @@ fun setText(id: String, text: String) {
     if (component is JTextComponent) {
         JTextComponentFixture(robot, component).setText(text)
     } else {
-        throw IllegalStateException("Component is not a TextField ")
+        throw IllegalStateException("Component is not a TextField")
     }
+}
+
+fun doAction(componentId: String, script: String) {
+    val component = componentStorage[componentId] ?: throw IllegalStateException("Unknown element id $componentId")
+    actionParser.getAction(script)(robot, component)
 }

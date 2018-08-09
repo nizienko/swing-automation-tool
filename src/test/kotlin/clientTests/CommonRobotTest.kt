@@ -1,12 +1,14 @@
 package clientTests
 
 import clientTests.lib.RemoteRobot
+import clientTests.lib.SearchScriptBuilder
 import clientTests.lib.elements.BaseElement
 import clientTests.lib.pageObject.SwingSet2App
-import com.jetbrains.test.swingAutomationTool.data.SearchFilter
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import javax.swing.JPanel
+import javax.swing.JToggleButton
 
 class CommonRobotTest {
 
@@ -31,19 +33,15 @@ class CommonRobotTest {
 
     @Test
     fun findAndClickElementsTest() {
-        remoteRobot.findElements<BaseElement>(
-                SearchFilter(
-//                        isShowing = true,
-//                        className = "javax.swing.JPanel"
-                        script = """{c: Component -> c.isShowing() && c::class.java.canonicalName == "javax.swing.JPanel"}"""
-                )).first()
-                .findElements<BaseElement>(
-                        SearchFilter(
-                                script = """{c: Component -> c.isShowing() && c::class.java.canonicalName ==  "javax.swing.JToggleButton"}"""
-                        )
-                ).forEach { it.click() }
+        remoteRobot.findElements<BaseElement> {
+            isShowing()
+            type(JPanel::class.java)
+        }.first()
+                .findElements<BaseElement> {
+                    isShowing()
+                    type(JToggleButton::class.java)
+                }.forEach { it.click() }
     }
-
 
     @Test
     fun editTextField() {
@@ -51,6 +49,13 @@ class CommonRobotTest {
             topPanel.jTableButton.click()
             jTablePanel.printingHeaderTextField.setTest("Hello from test")
         }
-        println()
+    }
+
+    @Test
+    fun testScriptBuilder() {
+        val script = SearchScriptBuilder().apply {
+            type(JPanel::class.java)
+        }.build()
+        println(script)
     }
 }
